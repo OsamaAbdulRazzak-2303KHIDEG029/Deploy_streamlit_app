@@ -365,3 +365,131 @@ def analyze_data(dfs: list[pd.DataFrame]) ->dict:
         ```
 2023-10-09 22:10:12 [INFO] Answer: {'type': 'plot', 'value': 'temp_chart.png'}
 2023-10-09 22:10:12 [INFO] Executed in: 51.86314368247986s
+2023-10-09 22:48:12 [INFO] Question: plot the bar chart for prouct lines with respect to its sales
+2023-10-09 22:48:12 [INFO] Running PandasAI with openai LLM...
+2023-10-09 22:48:12 [INFO] Prompt ID: 77ba0e6a-1fc9-4a02-9f3c-e0c591a2522f
+2023-10-09 22:48:12 [INFO] Using prompt: 
+You are provided with the following pandas DataFrames:
+
+<dataframe>
+Dataframe dfs[0], with 1000 rows and 17 columns.
+This is the metadata of the dataframe dfs[0]:
+Invoice ID,Branch,City,Customer type,Gender,Product line,Unit price,Quantity,Tax 5%,Total,Date,Time,Payment,cogs,gross margin percentage,gross income,Rating
+226-31-3081,C,Naypyitaw,Normal,Female,Electronic accessories,15.28,5,3.82,80.22,3/8/2019,10:29,Cash,76.4,4.761904762,3.82,9.6
+631-41-3108,A,Yangon,Normal,Male,Home and lifestyle,46.33,7,16.2155,340.5255,3/3/2019,13:23,Credit card,324.31,4.761904762,16.2155,7.4
+123-19-1176,A,Yangon,Member,Male,Health and beauty,58.22,8,23.288,489.048,1/27/2019,20:33,Ewallet,465.76,4.761904762,23.288,8.4
+750-67-8428,A,Yangon,Member,Female,Health and beauty,74.69,7,26.1415,548.9715,1/5/2019,13:08,Ewallet,522.83,4.761904762,26.1415,9.1
+373-73-7910,A,Yangon,Normal,Male,Sports and travel,86.31,7,30.2085,634.3785,2/8/2019,10:37,Ewallet,604.17,4.761904762,30.2085,5.3
+</dataframe>
+
+<conversation>
+User 1: plot the bar chart for prouct lines with respect to its sales
+</conversation>
+
+This is the initial python code to be updated:
+```python
+# TODO import all the dependencies required
+import pandas as pd
+
+def analyze_data(dfs: list[pd.DataFrame]) -> dict:
+    """
+    Analyze the data
+    1. Prepare: Preprocessing and cleaning data if necessary
+    2. Process: Manipulating data for analysis (grouping, filtering, aggregating, etc.)
+    3. Analyze: Conducting the actual analysis (if the user asks to plot a chart save it to an image in temp_chart.png and do not show the chart.)
+    At the end, return a dictionary of:
+    - type (possible values "string", "number", "dataframe", "plot")
+    - value (can be a string, a dataframe or the path of the plot, NOT a dictionary)
+    Examples: 
+        { "type": "string", "value": "The highest salary is $9,000." }
+        or
+        { "type": "number", "value": 125 }
+        or
+        { "type": "dataframe", "value": pd.DataFrame({...}) }
+        or
+        { "type": "plot", "value": "temp_chart.png" }
+    """
+```
+
+Using the provided dataframes (`dfs`), update the python code based on the last question in the conversation.
+
+Updated code:
+
+2023-10-09 22:48:58 [INFO] Code generated:
+```
+# TODO import all the dependencies required
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def analyze_data(dfs: list[pd.DataFrame]) -> dict:
+    """
+    Analyze the data
+    1. Prepare: Preprocessing and cleaning data if necessary
+    2. Process: Manipulating data for analysis (grouping, filtering, aggregating, etc.)
+    3. Analyze: Conducting the actual analysis (if the user asks to plot a chart save it to an image in temp_chart.png and do not show the chart.)
+    At the end, return a dictionary of:
+    - type (possible values "string", "number", "dataframe", "plot")
+    - value (can be a string, a dataframe or the path of the plot, NOT a dictionary)
+    Examples: 
+        { "type": "string", "value": "The highest salary is $9,000." }
+        or
+        { "type": "number", "value": 125 }
+        or
+        { "type": "dataframe", "value": pd.DataFrame({...}) }
+        or
+        { "type": "plot", "value": "temp_chart.png" }
+    """
+    # Prepare
+    df = dfs[0].copy()
+    
+    # Process
+    product_sales = df.groupby('Product line')['Total'].sum().reset_index()
+    
+    # Analyze
+    plt.figure(figsize=(10, 6))
+    plt.bar(product_sales['Product line'], product_sales['Total'])
+    plt.xlabel('Product Line')
+    plt.ylabel('Sales')
+    plt.title('Product Line Sales')
+    plt.xticks(rotation=45)
+    plt.savefig('temp_chart.png')
+    plt.close()
+    
+    return {"type": "plot", "value": "temp_chart.png"}
+```
+
+2023-10-09 22:48:58 [INFO] 
+Code running:
+```
+def analyze_data(dfs: list[pd.DataFrame]) ->dict:
+    """
+    Analyze the data
+    1. Prepare: Preprocessing and cleaning data if necessary
+    2. Process: Manipulating data for analysis (grouping, filtering, aggregating, etc.)
+    3. Analyze: Conducting the actual analysis (if the user asks to plot a chart save it to an image in temp_chart.png and do not show the chart.)
+    At the end, return a dictionary of:
+    - type (possible values "string", "number", "dataframe", "plot")
+    - value (can be a string, a dataframe or the path of the plot, NOT a dictionary)
+    Examples: 
+        { "type": "string", "value": "The highest salary is $9,000." }
+        or
+        { "type": "number", "value": 125 }
+        or
+        { "type": "dataframe", "value": pd.DataFrame({...}) }
+        or
+        { "type": "plot", "value": "temp_chart.png" }
+    """
+    df = dfs[0].copy()
+    product_sales = df.groupby('Product line')['Total'].sum().reset_index()
+    plt.figure(figsize=(10, 6))
+    plt.bar(product_sales['Product line'], product_sales['Total'])
+    plt.xlabel('Product Line')
+    plt.ylabel('Sales')
+    plt.title('Product Line Sales')
+    plt.xticks(rotation=45)
+    plt.savefig('temp_chart.png')
+    plt.close()
+    return {'type': 'plot', 'value': 'temp_chart.png'}
+        ```
+2023-10-09 22:48:58 [INFO] Answer: {'type': 'plot', 'value': 'temp_chart.png'}
+2023-10-09 22:48:58 [INFO] Executed in: 46.208961725234985s

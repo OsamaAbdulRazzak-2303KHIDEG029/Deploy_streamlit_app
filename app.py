@@ -4,6 +4,7 @@ import pandas as pd
 from pandasai import PandasAI
 from pandasai.llm.openai import OpenAI
 import matplotlib.pyplot as plt
+import matplotlib
 from pandasai import SmartDataframe, SmartDatalake
 from pandasai.responses.streamlit_response import StreamlitResponse
 import time
@@ -12,7 +13,7 @@ import time
 def clear_chat_history():
     st.session_state.messages = []
 
-# matplotlib.use('TkAgg')
+matplotlib.use('Agg')
 def main():
     api_key = st.sidebar.text_input(
         label="#### Your OpenAI API key 👇",
