@@ -3,21 +3,29 @@ import streamlit as st
 import pandas as pd
 from pandasai import PandasAI
 from pandasai.llm.openai import OpenAI
-import matplotlib
+import matplotlib.pyplot as plt
+from pandasai import SmartDataframe, SmartDatalake
+from pandasai.responses.streamlit_response import StreamlitResponse
+import time
 
+# Define a function to clear the chat history
+def clear_chat_history():
+    st.session_state.messages = []
 
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 def main():
     api_key = st.sidebar.text_input(
         label="#### Your OpenAI API key 👇",
         placeholder="Paste your openAI API key, sk-",
         type="password")
+    if not api_key:
+        st.warning("Please provide your OpenAI API key to run this app.")
+        st.stop()  # Stop execution if API key is not provided
 
     llm = OpenAI(api_token=api_key)
-    pandas_ai = PandasAI(llm)
 
     st.markdown("<h1 style='text-align: center; font-weight:bold; font-family:comic sans ms; padding-top: 0rem; color: grey;'>Chat2VIS</h1>", unsafe_allow_html=True)
-    st.markdown("<h2 style='text-align: center; padding-top: 0rem; color: grey;'>Creating Visualisations using Natural Language with ChatGPT </h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; padding-top: 0rem; color: grey;'>Creating Visualisations using Natural Language </h2>", unsafe_allow_html=True)
 
     with st.sidebar:
         # Choose your dataset
@@ -26,35 +34,53 @@ def main():
         # Add facility to upload a dataset
         uploaded_file = st.file_uploader(":computer: Load a CSV file:", type="csv")
 
-    if uploaded_file:
-        # Read in the uploaded CSV file and add it to the list of available datasets
-        file_name = uploaded_file.name[:-4].capitalize()
-        df = pd.read_csv(uploaded_file)
-        
-        # Display the first 5 rows of the loaded dataset
-        st.write(df.head(5))
-        
-        # Initialize chat history
-        if "messages" not in st.session_state:
-            st.session_state.messages = []
+        # Add a "Reset" button
+        if st.button("Reset Chat"):
+            clear_chat_history()
 
-        # Display chat messages from history on app rerun
-        for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
+    if uploaded_file is not None:
+        try:
+            df = pd.read_csv(uploaded_file, low_memory=False)
+            df = SmartDatalake(
+            [df],
+            config={"llm": llm, "verbose": True, "response_parser": StreamlitResponse},
+        )
+            print("dnidbeo",df)
+            # Convert SmartDatalake to DataFrame
+            # df = df.to_dataframe()
+            print("ecece3d",df)
 
-        # Accept user input
-        if prompt := st.chat_input("Ask your questions?"):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
+            # Initialize chat history
+            if "messages" not in st.session_state:
+                st.session_state.messages = []
 
-            with st.spinner("Generating ...."):  # Place the spinner here
-                response = pandas_ai.run(df, prompt=prompt)
-                
-            st.session_state.messages.append({"role": "assistant", "content": response})
-            with st.chat_message("assistant"):
-                st.write(response)
+            # Display chat messages from history on app rerun
+            for message in st.session_state.messages:
+                with st.chat_message(message["role"]):
+                    st.markdown(message["content"])
+
+            # Accept user input
+            if prompt := st.chat_input("Ask your questions?"):
+                start_time = time.time()
+                st.session_state.messages.append({"role": "user", "content": prompt})
+                with st.chat_message("user"):
+                    st.markdown(prompt)
+
+                with st.spinner("Generating ...."):  # Place the spinner here
+                    response = df.chat(query=prompt)
+                    end_time = time.time()
+                    execution_time = end_time - start_time
+                    
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                with st.chat_message("assistant"):
+                    if isinstance(response, plt.Figure):
+                        st.pyplot(response)
+                    else:
+                        st.write(response)
+                st.write("Execution time:", execution_time, "seconds")
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
+            
             
 if __name__ == '__main__':
     main()
